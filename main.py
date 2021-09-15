@@ -152,7 +152,6 @@ def updatebanlist():
         if isuseridindb(i):
             continue
         else:
-            # noinspection PyTypeChecker
             usr = twitch.get_users(user_ids=str(i))
             if len(usr['data']) == 0:
                 dctr += 1
@@ -222,7 +221,7 @@ for ch in chans:
 while True:
     clear()
     print('Choose an operation from the following list:')
-    print('    1. Update DB from CommanderRoot list')
+    print('    1. Update local database from online master list')
     print('    2. Check followers of a user for accounts in DB')
     print('    3. Add another user to monitor their chat for bad accounts')
     print('    4. Check if user is in the DB')
