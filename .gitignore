@@ -1,0 +1,7 @@
+venv
+logs
+.idea
+venv/**
+logs/**
+.idea/**
+config.ini
