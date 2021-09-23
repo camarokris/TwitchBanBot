@@ -142,6 +142,34 @@ def totalbadassholes():
     total = total + cur_res[0]
     return total
 
+def cleanbannedlist(list):
+    conny = sqlite3.connect('bannedusers.db')
+    conny.row_factory = lambda cursor, row: row[0]
+    cur = conny.cursor()
+    blist = []
+    cur.execute('select ID from BANNED')
+    result = cur.fetchall()
+    for i in result:
+        blist.append(int(i))
+    cur.execute('select ID from DEAD')
+    result = cur.fetchall()
+    for j in result:
+        blist.append(int(j))
+    print('Total IDs in DB: ' + str(len(blist)))
+    logging.info('Total IDs in DB: ' + str(len(blist)))
+    ctr = 0
+    for a in blist:
+        if a not in list:
+            print(str(a) + ' has been removed from the CommanderRoot list, removing from the DB')
+            logging.info(str(a) + ' has been removed from the CommanderRoot list, removing from the DB')
+            cur.execute('DELETE from DEAD where ID = ' + str(a))
+            conny.commit()
+            ctr += 1
+        else:
+            print('***' + str(a) + ' is still in the CommanderRootList***')
+    print('Total users removed from Banned table: ' + str(ctr))
+    logging.info('Total users removed from Banned table: ' + str(ctr))
+
 
 def updatebanlist():
     ctr = 0
@@ -168,12 +196,13 @@ def updatebanlist():
                 'Count: ' + str(ctr) + ' | Adding ID: ' + idd + ' | Created On: ' + created + ' | LOGIN: ' + login)
             addbanneduser(idd, login, created)
 
-    atotal = totalbadassholes()
     print('Total assholes before update in DB: ' + str(btotal))
     print('Total users added to BANNED table: ' + str(ctr))
     print('Total users added to DEAD table: ' + str(dctr))
+    cleanbannedlist(a)
     logging.info('Total users added to BANNED table: ' + str(ctr))
     logging.info('Total users added to DEAD table: ' + str(dctr))
+    atotal = totalbadassholes()
     print('Total assholes after update in DB: ' + str(atotal))
 
 

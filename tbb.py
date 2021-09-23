@@ -31,7 +31,7 @@ def createtable():
 
 def isuserloginindb(ida):
     cur = conn.cursor()
-    sql = """SELECT rowid FROM BANNED WHERE LOGIN = ?;"""
+    sql = """SELECT rowid FROM BANNED WHERE LOGIN = ?"""
     cur.execute(sql, (ida,))
     data = cur.fetchone()
     if data is None:
@@ -45,14 +45,18 @@ def isusrremoved():
     cur.execute('SELECT uid FROM ' + chan)
     resulta = cur.fetchall()
     for i in resulta:
-        blist.append(str(i))
+        if isinstance(i, tuple):
+            blist.append(str(i[0]))
+        else:
+            blist.append(str(i))
 
     if len(resulta) > 0:
         for id in resulta:
             if isuserloginindb(id):
                 junk = None
             else:
-                cur.execute("DELETE FROM " + chan + " WHERE uid = '" + id + "'")
+                sql = """DELETE FROM """ + chan + """ WHERE uid = ?"""
+                cur.execute(sql, (id,))
                 conn.commit()
                 c.privmsg(self.channel, '/unban ' + id)
                 logging.warning(id + ' is no longer in the CommanderRoot Blocklist. Ban removed')
