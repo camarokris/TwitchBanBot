@@ -23,6 +23,11 @@ logging.info('Channel: ' + chan)
 conn = sqlite3.connect('bannedusers.db')
 twitchHeaders = {'Authorization': 'Bearer ' + tokena, 'Client-Id': cid, 'Accept': 'application/json'}
 
+def createtable():
+    cur = conn.cursor()
+    cur.execute('CREATE TABLE IF NOT EXISTS ' + chan + ' (uid TEXT NOT NULL UNIQUE)')
+    conn.commit()
+    return 0
 
 def isuserloginindb(ida):
     cur = conn.cursor()
@@ -34,6 +39,30 @@ def isuserloginindb(ida):
     else:
         return True
 
+def isusrremoved():
+    blist = []
+    cur = conn.cursor()
+    cur.execute('SELECT uid FROM ' + chan)
+    resulta = cur.fetchall()
+    for i in resulta:
+        blist.append(str(i))
+
+    if len(resulta) > 0:
+        for id in resulta:
+            if isuserloginindb(id):
+                junk = None
+            else:
+                cur.execute("DELETE FROM " + chan + " WHERE uid = '" + id + "'")
+                conn.commit()
+                c.privmsg(self.channel, '/unban ' + id)
+                logging.warning(id + ' is no longer in the CommanderRoot Blocklist. Ban removed')
+    return 0
+
+def addtoblocklist(id):
+    cur = conn.cursor()
+    cur.execute('INSERT OR REPLACE INTO ' + chan + ' (uid) VALUES (' + id + ')')
+    conn.commit()
+    return 0
 
 class TwitchBot(irc.bot.SingleServerIRCBot):
     def __init__(self, username, client_id, token, channel):
@@ -63,12 +92,14 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
 
     def on_join(self, c, e):
         usrid = e.source.split('!')[0]
+        isusrremoved()
         if isuserloginindb(usrid):
             logging.warning(usrid + ' In CommanderRoot BlockList, banning.')
-            c.privmsg(self.channel, '/ban ' + usrid + 'This Username has been identified in the CommanderRoot Blocklist as a potential participant in follow bot/hate raids')
+            c.privmsg(self.channel, '/ban ' + usrid + 'This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
+            addtoblocklist(usrid)
         else:
             logging.info(usrid + ' is safe.')
 
-
+createtable()
 bot = TwitchBot(usern, cid, ctoken, chan)
 bot.start()
