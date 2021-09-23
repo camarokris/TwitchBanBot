@@ -65,7 +65,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         usrid = e.source.split('!')[0]
         if isuserloginindb(usrid):
             logging.warning(usrid + ' In CommanderRoot BlockList, banning.')
-            c.privmsg(self.channel, '/ban ' + usrid)
+            c.privmsg(self.channel, '/ban ' + usrid + 'This Username has been identified in the CommanderRoot Blocklist as a potential participant in follow bot/hate raids')
         else:
             logging.info(usrid + ' is safe.')
 
