@@ -162,7 +162,7 @@ def cleanbannedlist(list):
         if a not in list:
             print(str(a) + ' has been removed from the CommanderRoot list, removing from the DB')
             logging.info(str(a) + ' has been removed from the CommanderRoot list, removing from the DB')
-            cur.execute('DELETE from DEAD where ID = ' + str(a))
+            cur.execute('DELETE from DEAD where ID = ' + a)
             conny.commit()
             ctr += 1
         else:
