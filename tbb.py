@@ -32,7 +32,10 @@ def createtable():
 def isuserloginindb(ida):
     cur = conn.cursor()
     sql = """SELECT rowid FROM BANNED WHERE LOGIN = ?"""
-    cur.execute(sql, (ida,))
+    if isinstance(ida, tuple):
+        cur.execute(sql, ida)
+    else:
+        cur.execute(sql, (ida,))
     data = cur.fetchone()
     if data is None:
         return False

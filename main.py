@@ -143,7 +143,7 @@ def totalbadassholes():
     return total
 
 def cleanbannedlist(list):
-    conny = sqlite3.connect('bannedusers.db')
+    conny = sqlite3.connect('bannedusers.db', isolation_level=None)
     conny.row_factory = lambda cursor, row: row[0]
     cur = conny.cursor()
     blist = []
@@ -169,6 +169,8 @@ def cleanbannedlist(list):
             print('***' + str(a) + ' is still in the CommanderRootList***')
     print('Total users removed from Banned table: ' + str(ctr))
     logging.info('Total users removed from Banned table: ' + str(ctr))
+    cur.close()
+    conny.close()
 
 
 def updatebanlist():
