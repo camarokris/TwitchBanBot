@@ -7,6 +7,8 @@ import sqlite3
 import sys
 import logging
 import os
+
+import tempora.schedule
 from twitchAPI.twitch import Twitch
 from twitchAPI.types import AuthScope
 import irc.schedule
@@ -146,7 +148,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         c.cap('REQ', ':twitch.tv/commands')
         c.join(self.channel)
         #irc.bot.SingleServerIRCBot.reactor_class.scheduler_class.execute_every(self, period=60, func=self.checkfollowersforbots(c, e))
-        irc.schedule.DefaultScheduler.execute_every(self, period=60, func=self.checkfollowersforbots(c, e))
+        irc.schedule.DefaultScheduler.add(self, tempora.schedule.PeriodicCommand(60, func=self.checkfollowersforbots(c, e)))
+        execute_every(self, period=60, func=self.checkfollowersforbots(c, e))
 
     def on_join(self, c, e):
         usrid = e.source.split('!')[0]
