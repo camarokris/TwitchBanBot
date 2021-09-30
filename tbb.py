@@ -116,7 +116,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         logging.info('Connecting to ' + server + ' on port ' + str(port) + '...')
         irc.bot.SingleServerIRCBot.__init__(self, [(server, port, 'oauth:' + token)], username, username)
 
-    def checkfollowersforbots(self, c, e):
+    def checkfollowersforbotso(self, c, e):
         userinformation = twitch.get_users(logins=chan)
         pag = ""
         ctr = 0
@@ -172,7 +172,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         c.cap('REQ', ':twitch.tv/commands')
         c.join(self.channel)
         sleep(10)
-        self.reactor.scheduler.execute_every(60, self.checkfollowersforbots(self, c, e))
+        self.reactor.scheduler.execute_every(60, checkfollowersforbotso(self, c, e))
 
     def on_join(self, c, e):
         usrid = e.source.split('!')[0]
