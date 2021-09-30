@@ -9,7 +9,7 @@ import logging
 import os
 from twitchAPI.twitch import Twitch
 from twitchAPI.types import AuthScope
-#import irc.schedule
+import irc.schedule
 
 if not os.path.exists('logs'):
     os.makedirs('logs')
@@ -145,7 +145,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         c.cap('REQ', ':twitch.tv/tags')
         c.cap('REQ', ':twitch.tv/commands')
         c.join(self.channel)
-        irc.client.Reactor.scheduler_class.execute_every(self, period=60, func=self.checkfollowersforbots(c, e))
+        irc.bot.SingleServerIRCBot.reactor_class.scheduler_class.execute_every(self, period=60, func=self.checkfollowersforbots(c, e))
 
     def on_join(self, c, e):
         usrid = e.source.split('!')[0]
