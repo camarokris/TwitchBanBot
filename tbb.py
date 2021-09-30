@@ -104,7 +104,6 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         c.cap('REQ', ':twitch.tv/tags')
         c.cap('REQ', ':twitch.tv/commands')
         c.join(self.channel)
-        sleep(10)
 
     def on_join(self, c, e):
         def checkfollowersforbots():
