@@ -106,7 +106,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                 if isuserloginindb(badactor):
                     c.privmsg(self.channel, '/ban ' + badactor + 'This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
                     addtoblocklist(badactor)
-                    logging.warning(badactor + ' is Following ' + chan + 'AND has been banned')
+                    logging.warning(badactor + ' is Following ' + chan + ' AND has been banned')
             if len(foll['pagination']) > 0:
                 pag = foll['pagination']['cursor']
             else:
@@ -145,7 +145,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         c.cap('REQ', ':twitch.tv/tags')
         c.cap('REQ', ':twitch.tv/commands')
         c.join(self.channel)
-        irc.bot.SingleServerIRCBot.reactor_class.scheduler_class.execute_every(self, period=60, func=self.checkfollowersforbots(c, e))
+        #irc.bot.SingleServerIRCBot.reactor_class.scheduler_class.execute_every(self, period=60, func=self.checkfollowersforbots(c, e))
+        irc.schedule.DefaultScheduler.execute_every(self, period=60, func=self.checkfollowersforbots(c, e))
 
     def on_join(self, c, e):
         usrid = e.source.split('!')[0]
