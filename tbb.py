@@ -120,9 +120,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                     ctr += 1
                     badactor = foll['data'][a]['from_login']
                     if isuserloginindb(badactor):
-                        banmeplz = '/ban ' + badactor + ' This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.'
-                        print(banmeplz)
-                        c.privmsg(self.channel, '/ban ' + badactor + ' This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
+                        banmeplz = '/ban ' + badactor + ' This account has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed.'
                         c.privmsg(self.channel, banmeplz)
                         addtoblocklist(badactor)
                         logging.warning(badactor + ' is Following ' + chan + ' AND has been banned')
