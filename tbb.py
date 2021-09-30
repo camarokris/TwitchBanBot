@@ -19,17 +19,18 @@ config.read('config.ini')
 cid = config['TWITCH']['ClientID']
 csec = config['TWITCH']['ClientSecret']
 chans = config['TWITCH']['Channels'].replace(' ', '').split(',')
-usern = config['TWITCH']['Username']
-ctoken = config['TWITCH']['TMIPass']
-conn = sqlite3.connect('bannedusers.db')
+#usern = config['TWITCH']['Username']
+#ctoken = config['TWITCH']['TMIPass']
+#conn = sqlite3.connect('bannedusers.db')
 
 twitch = Twitch(cid, csec, target_app_auth_scope=[AuthScope.BITS_READ, AuthScope.MODERATION_READ,
                                                   AuthScope.USER_READ_BLOCKED_USERS, AuthScope.CHAT_EDIT,
                                                   AuthScope.CHAT_READ])
-url = "https://id.twitch.tv/oauth2/token?client_id=7ne11ngtwmae816wl6nazhfkxctsbd&client_secret=1t5nsbxmzmt4ps1708txe322qe4kva&grant_type=client_credentials&scope=chat:edit chat:read channel:moderate moderation:read user:read:follows bits:read user:read:blocked_users"
-rj = requests.post(url).json()
-token = rj['access_token']
-twitchHeaders = {'Authorization': 'Bearer ' + token, 'Client-Id': cid, 'Accept': 'application/json'}
+#url = "https://id.twitch.tv/oauth2/token?client_id=7ne11ngtwmae816wl6nazhfkxctsbd&client_secret=1t5nsbxmzmt4ps1708txe322qe4kva&grant_type=client_credentials&scope=chat:edit chat:read channel:moderate moderation:read user:read:follows bits:read user:read:blocked_users"
+#rj = requests.post(url).json()
+#token = rj['access_token']
+#twitchHeaders = {'Authorization': 'Bearer ' + token, 'Client-Id': cid, 'Accept': 'application/json'}
+
 
 cid = sys.argv[1]
 tokena = sys.argv[2]
@@ -49,21 +50,22 @@ def createtable():
     cur = conn.cursor()
     cur.execute('CREATE TABLE IF NOT EXISTS ' + chan + ' (uid TEXT NOT NULL UNIQUE)')
     conn.commit()
+    cur.close()
     return 0
 
 def isuserloginindb(ida):
     cur = conn.cursor()
-    sql = """SELECT rowid FROM BANNED WHERE LOGIN = ?"""
+    sql = 'SELECT rowid FROM BANNED WHERE LOGIN = ?'
     if isinstance(ida, tuple):
         cur.execute(sql, ida)
     else:
         cur.execute(sql, (ida,))
     data = cur.fetchone()
+    cur.close()
     if data is None:
         return False
     else:
         return True
-    cur.close()
 
 def addtoblocklist(id):
     cur = conn.cursor()
