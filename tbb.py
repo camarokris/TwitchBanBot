@@ -172,7 +172,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         c.cap('REQ', ':twitch.tv/commands')
         c.join(self.channel)
         sleep(10)
-        self.reactor.scheduler.execute_every(60, func=checkfollowersforbots(self, c, e))
+        #self.reactor.scheduler.execute_every(60, func=checkfollowersforbots(self, c, e))
+        irc.schedule.IScheduler.execute_every(self, 60, checkfollowersforbots(self, c, e))
 
     def on_join(self, c, e):
         usrid = e.source.split('!')[0]
