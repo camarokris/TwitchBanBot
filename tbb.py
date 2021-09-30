@@ -151,7 +151,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
 
     def on_join(self, c, e):
         usrid = e.source.split('!')[0]
-        self.isusrremoved(self, c, e)
+        self.isusrremoved(c, e)
         if isuserloginindb(usrid):
             logging.warning(usrid + ' In CommanderRoot BlockList, banning.')
             c.privmsg(self.channel, '/ban ' + usrid + 'This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
