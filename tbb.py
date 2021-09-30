@@ -7,6 +7,7 @@ import sqlite3
 import sys
 import logging
 import os
+from time import sleep
 
 import tempora.schedule
 from twitchAPI.twitch import Twitch
@@ -69,7 +70,6 @@ def isuserloginindb(ida):
 def addtoblocklist(id):
     cur = conn.cursor()
     sql = 'INSERT OR REPLACE INTO ' + chan + ' (uid) VALUES (?)'
-    print(sql)
     cur.execute(sql, (id,))
     conn.commit()
     return 0
@@ -147,7 +147,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         c.cap('REQ', ':twitch.tv/tags')
         c.cap('REQ', ':twitch.tv/commands')
         c.join(self.channel)
-        self.reactor.scheduler.execute_every(60, self.checkfollowersforbots(c, e))
+        sleep(10)
+        self.reactor.scheduler.execute_every('60', self.checkfollowersforbots(c, e)
 
     def on_join(self, c, e):
         usrid = e.source.split('!')[0]
