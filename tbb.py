@@ -102,13 +102,11 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
 
     def on_join(self, c, e):
         usrid = e.source.split('!')[0]
-        c.privmsg(self.channel, 'Hello ' + usrid)
         def checkfollowersforbots():
             userinformation = twitch.get_users(logins=chan)
             pag = ""
             ctr = 0
             logging.warning('Checking followers for bots and banning')
-            c.privmsg(self.channel, 'Checking Followers for Bots')
             while True:
                 if len(pag) > 0:
                     foll = twitch.get_users_follows(first=100, to_id=userinformation['data'][0]['id'], after=pag)
@@ -118,8 +116,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                     ctr += 1
                     badactor = foll['data'][a]['from_login']
                     if isuserloginindb(badactor):
-                        c.privmsg(self.channel, badactor)
-                        c.privmsg(self.channel, '/ban ' + badactor + 'This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
+                        c.privmsg(self.channel, '/ban ' + badactor + ' This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
                         addtoblocklist(badactor)
                         logging.warning(badactor + ' is Following ' + chan + ' AND has been banned')
                 if len(foll['pagination']) > 0:
