@@ -1,3 +1,4 @@
+import configparser
 import irc.bot
 import irc.client
 import requests
@@ -6,10 +7,29 @@ import sqlite3
 import sys
 import logging
 import os
+from twitchAPI.twitch import Twitch
+from twitchAPI.types import AuthScope
 #import irc.schedule
 
 if not os.path.exists('logs'):
     os.makedirs('logs')
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+cid = config['TWITCH']['ClientID']
+csec = config['TWITCH']['ClientSecret']
+chans = config['TWITCH']['Channels'].replace(' ', '').split(',')
+usern = config['TWITCH']['Username']
+ctoken = config['TWITCH']['TMIPass']
+conn = sqlite3.connect('bannedusers.db')
+
+twitch = Twitch(cid, csec, target_app_auth_scope=[AuthScope.BITS_READ, AuthScope.MODERATION_READ,
+                                                  AuthScope.USER_READ_BLOCKED_USERS, AuthScope.CHAT_EDIT,
+                                                  AuthScope.CHAT_READ])
+url = "https://id.twitch.tv/oauth2/token?client_id=7ne11ngtwmae816wl6nazhfkxctsbd&client_secret=1t5nsbxmzmt4ps1708txe322qe4kva&grant_type=client_credentials&scope=chat:edit chat:read channel:moderate moderation:read user:read:follows bits:read user:read:blocked_users"
+rj = requests.post(url).json()
+token = rj['access_token']
+twitchHeaders = {'Authorization': 'Bearer ' + token, 'Client-Id': cid, 'Accept': 'application/json'}
 
 cid = sys.argv[1]
 tokena = sys.argv[2]
@@ -46,7 +66,9 @@ def isuserloginindb(ida):
 
 def addtoblocklist(id):
     cur = conn.cursor()
-    cur.execute('INSERT OR REPLACE INTO ' + chan + ' (uid) VALUES (' + id + ')')
+    sql = 'INSERT OR REPLACE INTO ' + chan + ' (uid) VALUES (?)'
+    print(sql)
+    cur.execute(sql, (id,))
     conn.commit()
     return 0
 
@@ -82,7 +104,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                 ctr += 1
                 badactor = foll['data'][a]['from_login']
                 if isuserloginindb(badactor):
-                    c.privmsg(self.channel, '/ban ' + usrid + 'This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
+                    c.privmsg(self.channel, '/ban ' + badactor + 'This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
                     addtoblocklist(badactor)
                     logging.warning(badactor + ' is Following ' + chan + 'AND has been banned')
             if len(foll['pagination']) > 0:
@@ -123,7 +145,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         c.cap('REQ', ':twitch.tv/tags')
         c.cap('REQ', ':twitch.tv/commands')
         c.join(self.channel)
-        irc.client.Reactor.scheduler_class.execute_every(period=60, func=self.checkfollowersforbots(self, c, e))
+        irc.client.Reactor.scheduler_class.execute_every(self, period=60, func=self.checkfollowersforbots(c, e))
 
     def on_join(self, c, e):
         usrid = e.source.split('!')[0]
