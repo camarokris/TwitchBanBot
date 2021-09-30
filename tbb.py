@@ -1,4 +1,6 @@
 import configparser
+import datetime
+
 import irc.bot
 import irc.client
 import requests
@@ -74,30 +76,6 @@ def addtoblocklist(id):
     conn.commit()
     return 0
 
-def checkfollowersforbots(self, c, e):
-    userinformation = twitch.get_users(logins=chan)
-    pag = ""
-    ctr = 0
-    logging.warning('Checking followers for bots and banning')
-    while True:
-        if len(pag) > 0:
-            foll = twitch.get_users_follows(first=100, to_id=userinformation['data'][0]['id'], after=pag)
-        else:
-            foll = twitch.get_users_follows(first=100, to_id=userinformation['data'][0]['id'])
-        for a in range(len(foll['data'])):
-            ctr += 1
-            badactor = foll['data'][a]['from_login']
-            if isuserloginindb(badactor):
-                c.privmsg(self.channel, '/ban ' + badactor + 'This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
-                addtoblocklist(badactor)
-                logging.warning(badactor + ' is Following ' + chan + ' AND has been banned')
-        if len(foll['pagination']) > 0:
-            pag = foll['pagination']['cursor']
-        else:
-            break
-    print('Processed ' + str(ctr) + ' followers for ' + chan)
-    return 0
-
 class TwitchBot(irc.bot.SingleServerIRCBot):
     def __init__(self, username, client_id, token, channel):
         self.client_id = client_id
@@ -116,53 +94,6 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         logging.info('Connecting to ' + server + ' on port ' + str(port) + '...')
         irc.bot.SingleServerIRCBot.__init__(self, [(server, port, 'oauth:' + token)], username, username)
 
-    def checkfollowersforbotso(self, c, e):
-        userinformation = twitch.get_users(logins=chan)
-        pag = ""
-        ctr = 0
-        logging.warning('Checking followers for bots and banning')
-        while True:
-            if len(pag) > 0:
-                foll = twitch.get_users_follows(first=100, to_id=userinformation['data'][0]['id'], after=pag)
-            else:
-                foll = twitch.get_users_follows(first=100, to_id=userinformation['data'][0]['id'])
-            for a in range(len(foll['data'])):
-                ctr += 1
-                badactor = foll['data'][a]['from_login']
-                if isuserloginindb(badactor):
-                    c.privmsg(self.channel, '/ban ' + badactor + 'This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
-                    addtoblocklist(badactor)
-                    logging.warning(badactor + ' is Following ' + chan + ' AND has been banned')
-            if len(foll['pagination']) > 0:
-                pag = foll['pagination']['cursor']
-            else:
-                break
-        print('Processed ' + str(ctr) + ' followers for ' + chan)
-        return 0
-
-    def isusrremoved(self, c, e):
-        blist = []
-        cur = conn.cursor()
-        cur.execute('SELECT uid FROM ' + chan)
-        resulta = cur.fetchall()
-        for i in resulta:
-            if isinstance(i, tuple):
-                blist.append(str(i[0]))
-            else:
-                blist.append(str(i))
-
-        if len(resulta) > 0:
-            for id in resulta:
-                if isuserloginindb(id):
-                    junk = None
-                else:
-                    sql = """DELETE FROM """ + chan + """ WHERE uid = ?"""
-                    cur.execute(sql, (id,))
-                    conn.commit()
-                    c.privmsg(self.channel, '/unban ' + id)
-                    logging.warning(id + ' is no longer in the CommanderRoot Blocklist. Ban removed')
-        return 0
-
     def on_welcome(self, c, e):
         logging.info('Joining ' + self.channel)
 
@@ -172,20 +103,76 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         c.cap('REQ', ':twitch.tv/commands')
         c.join(self.channel)
         sleep(10)
-        #self.reactor.scheduler.execute_every(60, func=checkfollowersforbots(self, c, e))
-        #irc.schedule.IScheduler.execute_every(self, 60, checkfollowersforbots(self, c, e))
-        self.checkfollowersforbotso(c, e)
 
     def on_join(self, c, e):
+        def checkfollowersforbots():
+            userinformation = twitch.get_users(logins=chan)
+            pag = ""
+            ctr = 0
+            logging.warning('Checking followers for bots and banning')
+            while True:
+                if len(pag) > 0:
+                    foll = twitch.get_users_follows(first=100, to_id=userinformation['data'][0]['id'], after=pag)
+                else:
+                    foll = twitch.get_users_follows(first=100, to_id=userinformation['data'][0]['id'])
+                for a in range(len(foll['data'])):
+                    ctr += 1
+                    badactor = foll['data'][a]['from_login']
+                    if isuserloginindb(badactor):
+                        c.privmsg(self.channel,
+                                  '/ban ' + badactor + 'This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
+                        addtoblocklist(badactor)
+                        logging.warning(badactor + ' is Following ' + chan + ' AND has been banned')
+                if len(foll['pagination']) > 0:
+                    pag = foll['pagination']['cursor']
+                else:
+                    break
+            print('Processed ' + str(ctr) + ' followers for ' + chan)
+            return 0
+
+        def isusrremoved():
+            blist = []
+            cur = conn.cursor()
+            cur.execute('SELECT uid FROM ' + chan)
+            resulta = cur.fetchall()
+            for i in resulta:
+                if isinstance(i, tuple):
+                    blist.append(str(i[0]))
+                else:
+                    blist.append(str(i))
+
+            if len(resulta) > 0:
+                for id in resulta:
+                    if isuserloginindb(id):
+                        junk = None
+                    else:
+                        sql = """DELETE FROM """ + chan + """ WHERE uid = ?"""
+                        cur.execute(sql, (id,))
+                        conn.commit()
+                        c.privmsg(self.channel, '/unban ' + id)
+                        logging.warning(id + ' is no longer in the CommanderRoot Blocklist. Ban removed')
+            return 0
+
         usrid = e.source.split('!')[0]
-        self.isusrremoved(c, e)
+        isusrremoved()
         if isuserloginindb(usrid):
             logging.warning(usrid + ' In CommanderRoot BlockList, banning.')
             c.privmsg(self.channel, '/ban ' + usrid + 'This Username has been identified in the CommanderRoot Blocklist. If you feel this is in error please contact CommanderRoot on Twitter to have your ID removed from the list. Once we update our copy of the list your account will be unbanned if it has been removed.')
             addtoblocklist(usrid)
         else:
             logging.info(usrid + ' is safe.')
+        curtime = datetime.datetime.now()
+        if welc == 1:
+            welc = 0
+            checkfollowersforbots()
+        tottime = curtime - starttime
+        if tottime.total_seconds() > 600:
+            starttime = datetime.datetime.now()
+            checkfollowersforbots()
+
 
 createtable()
+starttime = datetime.datetime.now()
+welc = 1
 bot = TwitchBot(usern, cid, ctoken, chan)
 bot.start()
