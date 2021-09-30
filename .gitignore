@@ -5,3 +5,4 @@ venv/**
 logs/**
 .idea/**
 config.ini
+identifier.sqlite

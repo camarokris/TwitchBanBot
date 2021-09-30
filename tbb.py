@@ -29,7 +29,7 @@ twitch = Twitch(cid, csec, target_app_auth_scope=[AuthScope.BITS_READ, AuthScope
 url = "https://id.twitch.tv/oauth2/token?client_id=7ne11ngtwmae816wl6nazhfkxctsbd&client_secret=1t5nsbxmzmt4ps1708txe322qe4kva&grant_type=client_credentials&scope=chat:edit chat:read channel:moderate moderation:read user:read:follows bits:read user:read:blocked_users"
 rj = requests.post(url).json()
 token = rj['access_token']
-twitchHeaders = {'Authorization': 'Bearer ' + token, 'Client-Id': cid, 'Accept': 'application/json'}
+twitchHeadersa = {'Authorization': 'Bearer ' + token, 'Client-Id': cid, 'Accept': 'application/json'}
 
 
 cid = sys.argv[1]
@@ -44,7 +44,7 @@ logging.info('Username: ' + usern)
 logging.info('Channel: ' + chan)
 
 conn = sqlite3.connect('bannedusers.db')
-twitchHeadersa = {'Authorization': 'Bearer ' + tokena, 'Client-Id': cid, 'Accept': 'application/json'}
+twitchHeaders = {'Authorization': 'Bearer ' + tokena, 'Client-Id': cid, 'Accept': 'application/json'}
 
 def createtable():
     cur = conn.cursor()
