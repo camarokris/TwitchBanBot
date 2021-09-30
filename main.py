@@ -162,7 +162,11 @@ def cleanbannedlist(list):
         if a not in list:
             print(str(a) + ' has been removed from the CommanderRoot list, removing from the DB')
             logging.info(str(a) + ' has been removed from the CommanderRoot list, removing from the DB')
-            cur.execute('DELETE from DEAD where ID = ' + str(a))
+            delsql = 'DELETE from DEAD where ID = ?'
+            cur.execute(delsql, (a,))
+            conny.commit()
+            delsql = 'DELETE from BANNED where ID = ?'
+            cur.execute(delsql, (a,))
             conny.commit()
             ctr += 1
         else:
@@ -194,11 +198,11 @@ def updatebanlist():
             created = str(usr['data'][0]['created_at'])
             ctr += 1
             print('Count: ' + str(ctr) + ' | Adding ID: ' + idd + ' | Created On: ' + created + ' | LOGIN: ' + login)
-            logging.info(
-                'Count: ' + str(ctr) + ' | Adding ID: ' + idd + ' | Created On: ' + created + ' | LOGIN: ' + login)
+            logging.info('Count: ' + str(ctr) + ' | Adding ID: ' + idd + ' | Created On: ' + created + ' | LOGIN: ' + login)
             addbanneduser(idd, login, created)
 
     print('Total assholes before update in DB: ' + str(btotal))
+    logging.info('Total assholes before update in DB: ' + str(btotal))
     print('Total users added to BANNED table: ' + str(ctr))
     print('Total users added to DEAD table: ' + str(dctr))
     cleanbannedlist(a)
@@ -206,6 +210,7 @@ def updatebanlist():
     logging.info('Total users added to DEAD table: ' + str(dctr))
     atotal = totalbadassholes()
     print('Total assholes after update in DB: ' + str(atotal))
+    logging.info('Total assholes after update in DB: ' + str(atotal))
 
 
 def checkfollowersforbots(usr):
@@ -219,18 +224,14 @@ def checkfollowersforbots(usr):
             foll = twitch.get_users_follows(first=100, to_id=usrnfo['data'][0]['id'])
         for a in range(len(foll['data'])):
             ctr += 1
-#            print('checking ' + str(foll['data'][a]['from_login']))
-#            if isuseridindb(foll['data'][a]['from_login']):
-#                print(foll['data'][a][
-#                          'from_login'] + ' is Following ' + usr + 'AND is in the local database as a bad account, '
-#                                                                   'consider banning this account')
             if isuserloginindb(foll['data'][a]['from_login']):
                 print(foll['data'][a]['from_login'] + ' is Following ' + usr + 'AND is in the local database as a bad account, consider banning this account')
+                logging.info(foll['data'][a]['from_login'] + ' is Following ' + usr + 'AND is in the local database as a bad account, consider banning this account')
         if len(foll['pagination']) > 0:
             pag = foll['pagination']['cursor']
         else:
             break
-    print('Processed ' + str(ctr) + ' followers for ' + usr)
+    logging.info('Processed ' + str(ctr) + ' followers for ' + usr)
 
 
 def startbanbot(cida, tokena, userna, cha, ctokena):

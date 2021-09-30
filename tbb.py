@@ -63,12 +63,14 @@ def isuserloginindb(ida):
         return False
     else:
         return True
+    cur.close()
 
 def addtoblocklist(id):
     cur = conn.cursor()
     sql = 'INSERT OR REPLACE INTO ' + chan + ' (uid) VALUES (?)'
     cur.execute(sql, (id,))
     conn.commit()
+    cur.close()
     return 0
 
 class TwitchBot(irc.bot.SingleServerIRCBot):
@@ -147,6 +149,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                         conn.commit()
                         c.privmsg(self.channel, '/unban ' + id)
                         logging.warning(id + ' is no longer in the CommanderRoot Blocklist. Ban removed')
+            cur.close()
             return 0
 
         isusrremoved()
