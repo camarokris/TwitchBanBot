@@ -162,7 +162,7 @@ def cleanbannedlist(list):
         if a not in list:
             print(str(a) + ' has been removed from the CommanderRoot list, removing from the DB')
             logging.info(str(a) + ' has been removed from the CommanderRoot list, removing from the DB')
-            cur.execute('DELETE from DEAD where ID = ' + a)
+            cur.execute('DELETE from DEAD where ID = ' + str(a))
             conny.commit()
             ctr += 1
         else:
@@ -219,10 +219,13 @@ def checkfollowersforbots(usr):
             foll = twitch.get_users_follows(first=100, to_id=usrnfo['data'][0]['id'])
         for a in range(len(foll['data'])):
             ctr += 1
+#            print('checking ' + str(foll['data'][a]['from_login']))
+#            if isuseridindb(foll['data'][a]['from_login']):
+#                print(foll['data'][a][
+#                          'from_login'] + ' is Following ' + usr + 'AND is in the local database as a bad account, '
+#                                                                   'consider banning this account')
             if isuserloginindb(foll['data'][a]['from_login']):
-                print(foll['data'][a][
-                          'from_login'] + ' is Following ' + usr + 'AND is in the local database as a bad account, '
-                                                                   'consider banning this account')
+                print(foll['data'][a]['from_login'] + ' is Following ' + usr + 'AND is in the local database as a bad account, consider banning this account')
         if len(foll['pagination']) > 0:
             pag = foll['pagination']['cursor']
         else:
