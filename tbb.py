@@ -77,10 +77,12 @@ def addtoblocklist(id):
     return 0
 
 class TwitchBot(irc.bot.SingleServerIRCBot):
-    def __init__(self, username, client_id, token, channel):
+    def __init__(self, username, client_id, token, channel, starttime, welc):
         self.client_id = client_id
         self.token = token
         self.channel = '#' + channel
+        self.starttime = starttime
+        self.welc = welc
 
         # Get the channel id, we will need this for v5 API calls
         url = 'https://api.twitch.tv/helix/users?login=' + channel
@@ -162,17 +164,17 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         else:
             logging.info(usrid + ' is safe.')
         curtime = datetime.datetime.now()
-        if welc == 1:
-            welc = 0
+        if self.welc == 1:
+            self.welc = 0
             checkfollowersforbots()
-        tottime = curtime - starttime
+        tottime = curtime - self.starttime
         if tottime.total_seconds() > 600:
-            starttime = datetime.datetime.now()
+            self.starttime = datetime.datetime.now()
             checkfollowersforbots()
 
 
 createtable()
 starttime = datetime.datetime.now()
 welc = 1
-bot = TwitchBot(usern, cid, ctoken, chan)
+bot = TwitchBot(usern, cid, ctoken, chan, starttime, welc)
 bot.start()
