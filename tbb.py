@@ -26,10 +26,10 @@ chans = config['TWITCH']['Channels'].replace(' ', '').split(',')
 twitch = Twitch(cid, csec, target_app_auth_scope=[AuthScope.BITS_READ, AuthScope.MODERATION_READ,
                                                   AuthScope.USER_READ_BLOCKED_USERS, AuthScope.CHAT_EDIT,
                                                   AuthScope.CHAT_READ])
-#url = "https://id.twitch.tv/oauth2/token?client_id=7ne11ngtwmae816wl6nazhfkxctsbd&client_secret=1t5nsbxmzmt4ps1708txe322qe4kva&grant_type=client_credentials&scope=chat:edit chat:read channel:moderate moderation:read user:read:follows bits:read user:read:blocked_users"
-#rj = requests.post(url).json()
-#token = rj['access_token']
-#twitchHeaders = {'Authorization': 'Bearer ' + token, 'Client-Id': cid, 'Accept': 'application/json'}
+url = "https://id.twitch.tv/oauth2/token?client_id=7ne11ngtwmae816wl6nazhfkxctsbd&client_secret=1t5nsbxmzmt4ps1708txe322qe4kva&grant_type=client_credentials&scope=chat:edit chat:read channel:moderate moderation:read user:read:follows bits:read user:read:blocked_users"
+rj = requests.post(url).json()
+token = rj['access_token']
+twitchHeadersa = {'Authorization': 'Bearer ' + token, 'Client-Id': cid, 'Accept': 'application/json'}
 
 
 cid = sys.argv[1]
@@ -85,7 +85,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
 
         # Get the channel id, we will need this for v5 API calls
         url = 'https://api.twitch.tv/helix/users?login=' + channel
-        r = requests.get(url, headers=twitchHeaders)
+        r = requests.get(url, headers=twitchHeadersa)
         self.channel_id = json.loads(r.text)['data'][0]['id']
 
 
